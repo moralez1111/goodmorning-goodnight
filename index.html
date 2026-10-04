@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sun and Moon</title>
+<style>
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 0 100px;
+  background-color: #eee;
+  transition: background-color 0.5s ease;
+  text-align: center;
+}
+
+/* ---------- World ---------- */
+#world {
+  width: 400px;
+  height: 400px;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 5px solid #7a6021;
+  transition: border 0.5s ease;
+}
+
+/* ---------- Sun & Moon ---------- */
+#sun,
+#moon {
+  height: 200px;
+  width: 200px;
+  border-radius: 50%;
+  display: inline-block;
+  position: absolute;
+  top: 50px;
+  left: 90px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.15s ease, top 0.5s ease;
+}
+#sun {
+  background-color: #f4c042;
+  border: 5px solid #7a6021;
+}
+#moon {
+  background-color: #95c7fa;
+  border: 5px solid #67a8f1;
+}
+#sun:active,
+#moon:active {
+  transform: scale(0.92);
+}
+
+/* ---------- Craters ---------- */
+.crater {
+  position: absolute;
+  border-radius: 50%;
+  background: #67a8f1;
+}
+.crater1 { width: 30px; height: 30px; top: 40px;  left: 40px; }
+.crater2 { width: 15px; height: 15px; top: 20px;  left: 110px; }
+.crater3 { width: 25px; height: 25px; top: 50px;  left: 150px; }
+.crater4 { width: 35px; height: 35px; top: 130px; left: 30px; }
+.crater5 { width: 25px; height: 25px; top: 160px; left: 100px; }
+.crater6 { width: 20px; height: 20px; top: 140px; left: 150px; }
+
+/* ---------- Sunbeams ---------- */
+.sunbeams {
+  width: 250px;
+  height: 250px;
+  position: absolute;
+  top: -25px;
+  left: -25px;
+  animation: spin 28s linear infinite;
+}
+.beam {
+  width: 5px;
+  height: 30px;
+  background: #7a6021;
+  position: absolute;
+}
+.beam1 { transform: rotate(0deg);   top: -20px; left: 120px; }
+.beam2 { transform: rotate(45deg);  top: 20px;  left: 220px; }
+.beam3 { transform: rotate(90deg);  top: 110px; left: 250px; }
+.beam4 { transform: rotate(135deg); top: 200px; left: 220px; }
+.beam5 { transform: rotate(180deg); top: 240px; left: 120px; }
+.beam6 { transform: rotate(225deg); top: 200px; left: 20px; }
+.beam7 { transform: rotate(270deg); top: 110px; left: -10px; }
+.beam8 { transform: rotate(315deg); top: 20px;  left: 20px; }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ---------- Eyes ---------- */
+.eyes {
+  position: absolute;
+  width: 110px;
+  height: 20px;
+  top: 90px;
+  left: 45px;
+}
+.eyes-l,
+.eyes-r {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  animation: blink 5s linear infinite;
+}
+.eyes-l { left: 0; }
+.eyes-r { right: 0; }
+#moon .eyes-l, #moon .eyes-r { background: #0f2964; }
+#sun .eyes-l,  #sun .eyes-r  { background: #4f0504; }
+
+@keyframes blink {
+  0%   { height: 15px; top: 0; }
+  99%  { height: 15px; top: 0; }
+  100% { height: 0;    top: 7px; }
+}
+
+/* ---------- Speech bubble ---------- */
+.speech-bubble {
+  position: absolute;
+  top: -70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #fff;
+  color: #333;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 13px;
+  line-height: 1.3;
+  width: 170px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 20;
+}
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px 8px 0;
+  border-style: solid;
+  border-color: #fff transparent transparent transparent;
+}
+.speech-bubble.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-5px);
+}
+
+/* Bubble flips below the sun/moon when it's too high */
+.speech-bubble.below {
+  top: 215px;
+}
+.speech-bubble.below::after {
+  bottom: auto;
+  top: -8px;
+  border-width: 0 8px 8px;
+  border-color: transparent transparent #fff transparent;
+}
+.speech-bubble.below.show {
+  transform: translateX(-50%) translateY(5px);
+}
+
+/* ---------- Emoji burst ---------- */
+.floating-emoji {
+  position: fixed;
+  font-size: 28px;
+  pointer-events: none;
+  z-index: 1000;
+  will-change: transform, opacity;
+}
+
+/* ---------- Floating letter ---------- */
+#letter {
+  position: fixed;
+  left: 8vw;
+  top: 55vh;
+  z-index: 50;
+  cursor: pointer;
+  user-select: none;
+  text-align: center;
+  animation: letterDrift 26s ease-in-out infinite;
+}
+#letter:hover {
+  animation-play-state: paused;
+}
+.letter-emoji {
+  font-size: 64px;
+  animation: letterBob 2.4s ease-in-out infinite;
+}
+.letter-text {
+  margin-top: 4px;
+  color: #7a6021;
+  font-family: sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 16px;
+  transition: color 0.5s ease;
+}
+body.night .letter-text {
+  color: #d3d3d3;
+}
+
+@keyframes letterDrift {
+  0%   { transform: translate(0, 0)         rotate(-8deg); }
+  20%  { transform: translate(30vw, -12vh)  rotate(8deg); }
+  40%  { transform: translate(60vw, 4vh)    rotate(-6deg); }
+  60%  { transform: translate(78vw, -8vh)   rotate(10deg); }
+  80%  { transform: translate(35vw, 12vh)   rotate(-10deg); }
+  100% { transform: translate(0, 0)         rotate(-8deg); }
+}
+@keyframes letterBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+/* ---------- Message card ---------- */
+#letter-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+#letter-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.letter-card {
+  background: #fff;
+  color: #333;
+  width: 360px;
+  max-width: 85vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 34px 28px 28px;
+  border-radius: 24px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+  font-family: sans-serif;
+  text-align: center;
+  transform: scale(0.6) rotate(-4deg);
+  transition: transform 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+#letter-overlay.show .letter-card {
+  transform: scale(1) rotate(0deg);
+}
+.letter-card-emoji {
+  font-size: 56px;
+  margin-bottom: 10px;
+}
+#letter-message {
+  margin: 0 0 22px;
+  font-size: 17px;
+  font-weight: bold;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+#letter-close {
+  background: lightblue;
+  border: 1px solid #fff;
+  border-radius: 42px;
+  box-shadow: 0 0 5px #ddd;
+  padding: 12px 28px;
+  font-family: sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+#letter-close:hover {
+  filter: brightness(1.05);
+}
+
+/* ---------- Clock & countdown ---------- */
+#info {
+  margin-top: 24px;
+  font-family: sans-serif;
+  font-weight: bold;
+  color: #7a6021;
+  transition: color 0.5s ease;
+}
+body.night #info {
+  color: #d3d3d3;
+}
+#clock {
+  font-size: 44px;
+  letter-spacing: 2px;
+}
+#date {
+  margin-top: 4px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  opacity: 0.8;
+}
+#anniv-title,
+#anniv-message {
+  margin-top: 26px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+#anniv-message {
+  font-size: 22px;
+  text-transform: none;
+}
+#countdown {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.time-box {
+  background: #fff;
+  color: #333;
+  min-width: 64px;
+  padding: 10px 8px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.time-box span {
+  display: block;
+  font-size: 28px;
+}
+.time-box small {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.6;
+}
+</style>
+</head>
+<body>
+
+<div id="world">
+  <div id="sun">
+    <div class="speech-bubble" id="sun-bubble"></div>
+    <div class="sunbeams">
+      <div class="beam beam1"></div>
+      <div class="beam beam2"></div>
+      <div class="beam beam3"></div>
+      <div class="beam beam4"></div>
+      <div class="beam beam5"></div>
+      <div class="beam beam6"></div>
+      <div class="beam beam7"></div>
+      <div class="beam beam8"></div>
+    </div>
+    <div class="eyes">
+      <div class="eyes-l"></div>
+      <div class="eyes-r"></div>
+    </div>
+  </div>
+
+  <div id="moon">
+    <div class="speech-bubble" id="moon-bubble"></div>
+    <div class="crater crater1"></div>
+    <div class="crater crater2"></div>
+    <div class="crater crater3"></div>
+    <div class="crater crater4"></div>
+    <div class="crater crater5"></div>
+    <div class="crater crater6"></div>
+    <div class="eyes">
+      <div class="eyes-l"></div>
+      <div class="eyes-r"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Clock & anniversary countdown -->
+<div id="info">
+  <div id="clock"></div>
+  <div id="date"></div>
+
+  <div id="anniv-title">Until our 8 month anniversary 💖</div>
+  <div id="countdown">
+    <div class="time-box"><span id="cd-days">0</span><small>days</small></div>
+    <div class="time-box"><span id="cd-hours">00</span><small>hours</small></div>
+    <div class="time-box"><span id="cd-mins">00</span><small>min</small></div>
+    <div class="time-box"><span id="cd-secs">00</span><small>sec</small></div>
+  </div>
+  <div id="anniv-message"></div>
+</div>
+
+<!-- Floating letter -->
+<div id="letter">
+  <div class="letter-emoji">💌</div>
+  <div class="letter-text">Open Me</div>
+</div>
+
+<!-- Message card -->
+<div id="letter-overlay">
+  <div class="letter-card">
+    <div class="letter-card-emoji">💌</div>
+    <p id="letter-message"></p>
+    <button id="letter-close">Close 💛</button>
+  </div>
+</div>
+
+<script>
+// ---------- Elements ----------
+const world = document.getElementById('world');
+const sunElement = document.getElementById('sun');
+const moonElement = document.getElementById('moon');
+const sunBubble = document.getElementById('sun-bubble');
+const moonBubble = document.getElementById('moon-bubble');
+
+// ---------- Theme (day / night colours) ----------
+function setTheme(isNight) {
+  document.body.classList.toggle('night', isNight);
+  document.body.style.backgroundColor = isNight ? '#002551' : '#f4c042';
+  world.style.borderBottom = '5px solid ' + (isNight ? '#67a8f1' : '#7a6021');
+}
+
+// ---------- Animation control ----------
+function gettimeofday(hourValue) {
+  const hour = Number(hourValue);
+
+  if (hour >= 0 && hour < 5) {
+    const percent = (hour / 4) * 100;
+    moonElement.style.top = (percent * 2.5 + 50) + 'px';
+    sunElement.style.top = '450px';
+    setTheme(true);
+  } else if (hour >= 5 && hour < 12) {
+    const percent = ((hour - 5) / 7) * 100;
+    sunElement.style.top = (300 - percent * 2.9) + 'px';
+    moonElement.style.top = '400px';
+    setTheme(false);
+  } else if (hour >= 12 && hour < 19) {
+    const percent = ((hour - 12) / 7) * 100;
+    sunElement.style.top = (percent * 2.9 + 50) + 'px';
+    moonElement.style.top = '400px';
+    setTheme(false);
+  } else if (hour >= 19 && hour <= 24) {
+    const percent = ((hour - 20) / 5) * 100;
+    moonElement.style.top = (200 - percent * 2.5 + 50) + 'px';
+    sunElement.style.top = '450px';
+    setTheme(true);
+  }
+}
+
+// ---------- Real-time ----------
+function updatetime() {
+  gettimeofday(new Date().getHours());
+}
+
+updatetime();
+setInterval(updatetime, 1000);
+
+// ---------- Messages & emojis ----------
+const sunMessages = [
+  'Good morning, baby!',
+  'Have a great day!',
+  'You are my sunshine!',
+  'You are my brightest star!',
+  'Rise and shine, sweetheart!',
+  'Hope your day is as bright as you!'
+];
+
+const moonMessages = [
+  'Sweet dreams, baby!',
+  'Goodnight, honey!',
+  'Sleep well!',
+  "Can't wait to talk to you tomorrow!",
+  'Sleep tight, my love!',
+  'Sweet dreams!'
+];
+
+const sunEmojis = ['☀️', '💛', '🌻', '✨', '💖', '😘'];
+const moonEmojis = ['🌙', '⭐', '💤', '💜', '✨', '😴'];
+
+function randomItem(list) {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+// ---------- Emoji burst ----------
+function spawnEmojis(parentElement, emojiList) {
+  const rect = parentElement.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const count = 14 + Math.floor(Math.random() * 6); // 14 to 19 emojis
+
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'floating-emoji';
+    el.textContent = randomItem(emojiList);
+    el.style.left = cx + 'px';
+    el.style.top = cy + 'px';
+    el.style.fontSize = (20 + Math.random() * 20) + 'px';
+    document.body.appendChild(el);
+
+    // Physics: launch direction, speed, gravity
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 110 + Math.random() * 170;
+    const vx = Math.cos(angle) * speed;
+    const vy = Math.sin(angle) * speed - 90; // slight upward bias
+    const gravity = 280;
+    const spin = Math.random() * 720 - 360;
+    const duration = 1500 + Math.random() * 900;
+    const seconds = duration / 1000;
+
+    // Many small steps so the motion is one smooth curve
+    const steps = 30;
+    const frames = [];
+    for (let s = 0; s <= steps; s++) {
+      const t = s / steps;
+      const time = t * seconds;
+      const x = vx * time;
+      const y = vy * time + 0.5 * gravity * time * time;
+
+      let scale;
+      if (t < 0.12) scale = 0.3 + (t / 0.12) * 0.9;   // pop in
+      else scale = 1.2 - ((t - 0.12) / 0.88) * 0.7;    // shrink out
+
+      frames.push({
+        offset: t,
+        opacity: t < 0.7 ? 1 : 1 - (t - 0.7) / 0.3,    // fade at the end
+        transform: 'translate(-50%, -50%) translate(' + x + 'px,' + y + 'px) ' +
+                   'rotate(' + (spin * t) + 'deg) scale(' + scale + ')'
+      });
+    }
+
+    const anim = el.animate(frames, {
+      duration: duration,
+      delay: Math.random() * 80,
+      easing: 'linear',
+      fill: 'forwards'
+    });
+    anim.onfinish = function () { el.remove(); };
+  }
+}
+
+// ---------- Sun / moon click handling ----------
+function setupClick(element, bubble, messages, emojis) {
+  let timer;
+
+  element.addEventListener('click', function () {
+    bubble.innerText = randomItem(messages);
+
+    // flip the bubble below if the sun/moon is near the top
+    bubble.classList.toggle('below', element.offsetTop < 90);
+
+    bubble.classList.add('show');
+    spawnEmojis(element, emojis);
+
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      bubble.classList.remove('show');
+    }, 3000);
+  });
+}
+
+setupClick(sunElement, sunBubble, sunMessages, sunEmojis);
+setupClick(moonElement, moonBubble, moonMessages, moonEmojis);
+
+// ---------- Floating letter ----------
+const letter = document.getElementById('letter');
+const letterOverlay = document.getElementById('letter-overlay');
+const letterMessage = document.getElementById('letter-message');
+const letterClose = document.getElementById('letter-close');
+
+const letterMessagesDay = [
+  'დილამშვიდობის ჩემო საყვარელო! იმედი მაქვს კარგად გეძინა და ამჯერად მაინც არ მოგიშალე სიზმარში რაიმე სისულელეთი ნერვები და მაინც თუ რაიმე დებილობა ვქენი იცოდე რომ მე მაგას რეალურად არ ვიზავდიი. ენივეი ძალიან მარტივი და კარგი მიზეზით გწერ ამ მესიჯს, მინდა რომ ეს დღე და კვირა მსუბუქად და ბედნიერად დაიწყო. კი ვიცი ორშაბათია მუშაობაზე გზაზე ამაზე იმაზე ფიქრი უკვე დამღლელად ჟღერს ამიტომ ამ ღამეს  ( როცა ამ საიტს ვაწყობ ) იმისთვის ვათენებ რომ ჩემი უძვირფასესი, უსაყვარლესი, უმშვენიერესი, უკარგესი, უსათნოესი, უნიჭიერესი, უჭკვიანესი შეყვარებული დავმუხტო, ენერგია მივცე და რაც ყველაზე მთავარია გავაღიმო. smile baby!🌻 ძალიან ლამაზი ხარ როდესაც იღიმი! მინდა იცოდე რომ მიყვარხარ მინდა იცოდე რომ ძალიან მომენატრე ყველაზე მეტად მაბედნიერებ და მინდა, რომ თუ სისულელეის კეთება იქნება ყოველთვის ისეთი გავაკეთო, რომ გაგაბედნიერო, გაგაცინო, გაგამხიარულო! ძალიან ძალიან მიყვარხარ! ერთი სული მაქვს საღამო მოვიდეს რომ გნახო ჩემო ულამაზესო! დარმწუნებული ვარ საოცრად გამოიყურები! პს sweetie, you owe me a selfie!💛'
+];
+
+const letterMessagesNight = [
+  'The day is done and you did amazing. Time to rest 🌙',
+  'Look up tonight. We are under the same sky ⭐',
+  'Put your phone down, close your eyes, and dream of me 💤',
+  'I wish I could tuck you in tonight 💜',
+  'Goodnight, my love. See you in my dreams 🌌'
+];
+
+letter.addEventListener('click', function () {
+  const isNight = document.body.classList.contains('night');
+  letterMessage.textContent = randomItem(isNight ? letterMessagesNight : letterMessagesDay);
+  letterOverlay.classList.add('show');
+  spawnEmojis(letter, isNight ? ['💌', '🌙', '⭐', '💜'] : ['💌', '☀️', '💛', '✨']);
+});
+
+function closeLetter() {
+  letterOverlay.classList.remove('show');
+}
+
+letterClose.addEventListener('click', closeLetter);
+letterOverlay.addEventListener('click', function (e) {
+  if (e.target === letterOverlay) closeLetter(); // click outside the card
+});
+
+// ---------- Clock & anniversary countdown ----------
+const ANNIVERSARY = new Date(2026, 9, 16); // October 16, 2026 (months start at 0)
+
+const clockEl = document.getElementById('clock');
+const dateEl = document.getElementById('date');
+const countdownEl = document.getElementById('countdown');
+const annivTitle = document.getElementById('anniv-title');
+const annivMessage = document.getElementById('anniv-message');
+
+function pad(n) {
+  return String(n).padStart(2, '0');
+}
+
+function updateClockAndCountdown() {
+  const now = new Date();
+
+  clockEl.textContent = now.toLocaleTimeString([], {
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+  dateEl.textContent = now.toLocaleDateString([], {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  const diff = ANNIVERSARY - now;
+  const dayAfter = new Date(ANNIVERSARY.getTime() + 24 * 60 * 60 * 1000);
+
+  if (diff > 0) {
+    const totalSecs = Math.floor(diff / 1000);
+    document.getElementById('cd-days').textContent = Math.floor(totalSecs / 86400);
+    document.getElementById('cd-hours').textContent = pad(Math.floor(totalSecs % 86400 / 3600));
+    document.getElementById('cd-mins').textContent = pad(Math.floor(totalSecs % 3600 / 60));
+    document.getElementById('cd-secs').textContent = pad(totalSecs % 60);
+    countdownEl.style.display = 'flex';
+    annivTitle.style.display = 'block';
+    annivMessage.textContent = '';
+  } else {
+    countdownEl.style.display = 'none';
+    annivTitle.style.display = 'none';
+    annivMessage.textContent = now < dayAfter
+      ? '🎉 Happy 8 month anniversary, my love! 💖'
+      : '💖 8 months and counting 💖';
+  }
+}
+
+updateClockAndCountdown();
+setInterval(updateClockAndCountdown, 1000);
+</script>
+
+</body>
+</html>
